@@ -8,6 +8,38 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+import hashlib
+
+# ── Contraseña (SHA-256 del texto plano) ──────────────────────────────────
+# Para cambiarla, reemplaza el valor de APP_PASSWORD y recalcula el hash:
+#   python3 -c "import hashlib; print(hashlib.sha256('TU_NUEVA_CLAVE'.encode()).hexdigest())"
+APP_PASSWORD_HASH = "641509a066dd2fd700dbbef97eba0faad0cdcda9f4f398d33b29fbaf065f1376"
+
+def check_password() -> bool:
+    """Muestra pantalla de login y devuelve True si la contraseña es correcta."""
+    if st.session_state.get("autenticado"):
+        return True
+
+    st.set_page_config(
+        page_title="Acceso — Activaciones",
+        page_icon="🔒",
+        layout="centered",
+    )
+    st.markdown("## 🔒 Acceso restringido")
+    st.markdown("Ingresa la contraseña para continuar.")
+
+    pwd = st.text_input("Contraseña", type="password", key="pwd_input")
+
+    if st.button("Entrar"):
+        if hashlib.sha256(pwd.encode()).hexdigest() == APP_PASSWORD_HASH:
+            st.session_state["autenticado"] = True
+            st.rerun()
+        else:
+            st.error("Contraseña incorrecta.")
+    return False
+
+if not check_password():
+    st.stop()
 
 # ── Página ────────────────────────────────────────────────────────────────
 st.set_page_config(
